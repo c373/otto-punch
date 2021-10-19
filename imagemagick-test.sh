@@ -68,10 +68,11 @@ get_info () {
 #helper function to rename the file with an appended number if the proposed filename already exists
 rename_file () {
 
+	#$1 - original file, $2 - unit, $3 - location, $4 - iteration
 	local i=$4
 	if [ -f "$2 - $3$4.jpg" ]
 	then
-		let "i+=1"
+		((i++))
 		rename_file "$1" "$2" "$3" "$i" 
 	else
 		mv -v "$1" "$2 - $3$4.jpg"
@@ -101,13 +102,13 @@ do
 	#save the pid for future control
 	id=$!
 
-	confirm="n"	
+	confirm="n"
 	get_info "$f"
 
 	#check orientation of the photo
 	orientation=$( identify -format '%[EXIF:*]' "$f" | grep "Orientation=" | tail -c 2 )
 
-	#rotate the file according to EXIF for processing will be reverted later
+	#rotate the file according to EXIF for processing
 	if [ "$orientation" = "6" ]
 	  then
 		convert "$f" -rotate 90 "$f"
@@ -132,14 +133,9 @@ do
 		longedge=$height
 	fi
 
-	echo "longedge:$longedge"
-
 	pointsize=$((longedge/30))
 	offset=$((pointsize/2))
 	splice_height=$((pointsize+offset))
-
-	echo "pointsize:$pointsize"
-	echo "splice_height:$splice_height"
 
 	#add label and output to a seperate file
 	convert "$f" -pointsize "$pointsize" -gravity South -background "#FFA500" -fill White -splice "0x$splice_height" -annotate "+0+$offset" "$unit - $issue" "$f.new"
@@ -160,14 +156,14 @@ do
 
 	#rename the output file
 	rename_file "$f.new" "$unit" "$location"
-	#cleanup
-	rm "$f"
 
 	#add issue to the punchlist file
 	log_info "$i" "$location" "$issue"
 	
 	#close the feh process with the image preview
 	kill $id
+	#cleanup
+	rm "$f"
 
 	#increment photo count
 	((i++))
