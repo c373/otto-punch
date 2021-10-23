@@ -1,16 +1,20 @@
 #!/bin/bash
 
-#request the path that contains the photos
-while [ ! -d "$dir_path" ]
-do
-	echo -n 'Please enter path to work in or "exit" to quit: '
-	read dir_path
+#check to see path was provided as an arg
+if [ -z "$1" ] && [ -d "$1"]
+  then
+	#request the path that contains the photos
+	while [ ! -d "$dir_path" ]
+	do
+		echo -n 'Please enter path to work in or "exit" to quit: '
+		read dir_path
 
-	if [ "$dir_path" = "exit" ]
-	  then
-		exit 1
-	fi
-done
+		if [ "$dir_path" = "exit" ]
+		  then
+			exit 1
+		fi
+	done
+fi
 
 #setup the punchlist.txt file
 echo -n 'Please enter unit: '
